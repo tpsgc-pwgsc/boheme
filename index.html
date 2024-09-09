@@ -44,7 +44,7 @@
             display: block;
             margin: 10px 0;
         }
-        input[type="number"], input[type="range"] {
+        input[type="number"] {
             width: 100%;
             padding: 8px;
             margin-bottom: 20px;
@@ -76,9 +76,6 @@
     <label><input type="checkbox" id="major-pentatonic" checked> Major Pentatonic Scales</label>
     <label><input type="checkbox" id="minor-pentatonic" checked> Minor Pentatonic Scales</label>
 
-    <label for="bpm">BPM (Metronome): <span id="bpm-value">100</span></label>
-    <input type="range" id="bpm" min="70" max="160" value="100" oninput="updateBpmValue()">
-    
     <button onclick="startRandomScale()">Start Practice</button>
 </div>
 
@@ -128,37 +125,16 @@
         ]
     };
 
-    let intervalId; // Keep track of the interval for random scales
+    let intervalId; // Keep track of the interval
     let countdownId; // Keep track of the countdown
-    let metronomeId; // Keep track of the metronome
-    const beep = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-
-    function updateBpmValue() {
-        const bpmValue = document.getElementById('bpm').value;
-        document.getElementById('bpm-value').textContent = bpmValue;
-    }
-
-    function startMetronome(bpm) {
-        const interval = 60000 / bpm; // Convert BPM to interval in milliseconds
-
-        if (metronomeId) clearInterval(metronomeId); // Clear previous metronome
-        metronomeId = setInterval(() => {
-            beep.play();
-        }, interval);
-    }
 
     function startRandomScale() {
         // Get the number of seconds
         const seconds = parseInt(document.getElementById('seconds').value);
-        const bpm = parseInt(document.getElementById('bpm').value);
-
         if (isNaN(seconds) || seconds <= 0) {
             alert("Please enter a valid number of seconds.");
             return;
         }
-
-        // Start metronome
-        startMetronome(bpm);
 
         // Gather the selected scales
         const selectedScales = [];
@@ -181,22 +157,28 @@
             return;
         }
 
-        // Function to display a random scale
+        // Clear any existing interval and countdown to avoid multiple intervals running
+        if (intervalId) clearInterval(intervalId);
+        if (countdownId) clearInterval(countdownId);
+
+        const scaleElement = document.getElementById('scale');
+        const notesElement = document.getElementById('notes');
+        const timerElement = document.getElementById('timer');
+
         function displayRandomScale() {
             const randomScale = selectedScales[Math.floor(Math.random() * selectedScales.length)];
-            document.getElementById('scale').textContent = randomScale.name;
-            document.getElementById('notes').textContent = randomScale.notes.join(' ');
+            scaleElement.textContent = randomScale.name;
+            notesElement.textContent = randomScale.notes.join(' ');
 
-            // Reset countdown
-            let remainingTime = seconds;
-            document.getElementById('timer').textContent = `Time remaining: ${remainingTime}s`;
+            let timeLeft = seconds; // Reset countdown on each interval
+            timerElement.textContent = `Time remaining: ${timeLeft}s`;
 
-            if (countdownId) clearInterval(countdownId);
+            // Countdown function
             countdownId = setInterval(() => {
-                remainingTime--;
-                document.getElementById('timer').textContent = `Time remaining: ${remainingTime}s`;
-                if (remainingTime <= 0) {
-                    clearInterval(countdownId); // Stop countdown when time is up
+                timeLeft--;
+                timerElement.textContent = `Time remaining: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownId); // Stop the countdown at 0
                 }
             }, 1000);
         }
@@ -205,7 +187,6 @@
         displayRandomScale();
 
         // Set the interval to display a new random scale every 'seconds' seconds
-        if (intervalId) clearInterval(intervalId); // Clear any previous intervals
         intervalId = setInterval(displayRandomScale, seconds * 1000);
     }
 </script>
