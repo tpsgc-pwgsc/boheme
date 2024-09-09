@@ -1,12 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studio Boheme</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Scale Practice</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .scale-box {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .scale {
+            font-size: 2em;
+            color: #333;
+        }
+        .timer {
+            font-size: 1.5em;
+            color: #777;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-<h1>Studio Boheme</h1>
-<p>Ouvre bientôt - Opening Soon!</p>
+
+<div class="scale-box">
+    <div class="scale" id="scale">Press Start!</div>
+    <div class="timer" id="timer">Seconds left: 0</div>
+    <button onclick="startRandomScale()">Start</button>
+</div>
+
+<script>
+    const scales = [
+        'C Major', 'D Major', 'E Major', 'F Major', 'G Major', 'A Major', 'B Major',
+        'C Minor', 'D Minor', 'E Minor', 'F Minor', 'G Minor', 'A Minor', 'B Minor'
+    ];
+    
+    let intervalId;
+
+    function startRandomScale() {
+        let time = prompt("Enter the number of seconds to display each scale:", 5);
+        if (isNaN(time) || time <= 0) {
+            alert("Please enter a valid positive number.");
+            return;
+        }
+        time = parseInt(time);
+
+        displayRandomScale(time);
+    }
+
+    function displayRandomScale(seconds) {
+        if (intervalId) clearInterval(intervalId);
+
+        const scaleElement = document.getElementById('scale');
+        const timerElement = document.getElementById('timer');
+
+        intervalId = setInterval(() => {
+            const randomScale = scales[Math.floor(Math.random() * scales.length)];
+            scaleElement.textContent = randomScale;
+            timerElement.textContent = `Seconds left: ${seconds}`;
+
+            let countdown = seconds;
+            const countdownId = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(countdownId);
+                }
+                timerElement.textContent = `Seconds left: ${countdown}`;
+            }, 1000);
+        }, seconds * 1000);
+    }
+</script>
+
 </body>
 </html>
